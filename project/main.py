@@ -236,15 +236,64 @@ else:
     df_jaccardDistance_bert = pd.DataFrame(index=index_values)
 
 
+dataVectors = {
+    "tfidf" : tf_idf,
+    "bert"  : bert,
+    "word2vec" : word2vec
+}
+
+similarityFunctions = {
+    "cosineSim" : cosine_similarity,
+    "innerProduct" : inner_product,
+    "jaccardSim" : jaccard_formulation
+}
+
+queryDistances = {
+    "cosineSim_tfidf" : df_cosineDistance_tfidf,
+    "innerProduct_tfidf" : df_innerProductDistance_tfidf,
+    "jaccardSim_tfidf" : df_jaccardDistance_tfidf,
+    "cosineSim_word2vec" : df_cosineDistance_word2vec,
+    "innerProduct_word2vec" : df_innerProductDistance_word2vec,
+    "jaccardSim_word2vec" : df_jaccardDistance_word2vec,
+    "cosineSim_bert" : df_cosineDistance_bert,
+    "innerProduct_bert" : df_innerProductDistance_bert,
+    "jaccardSim_bert" : df_jaccardDistance_bert,
+}
+
 app = FastAPI()
 
 @app.get("/query/")
-async def getTopResults(artist: str, track: str, top: int):
-    print("Get Top results for ", artist, " ",track)
-    id_song = getSongIdByQuery(artist, track)
-    distanceToSongs(id_song, cosine_similarity, df_cosineDistance_tfidf, tf_idf)
-    querySong = getTopValues(id_song, df_cosineDistance_tfidf).loc[id_song]
-    topValues = getTopValues(id_song, df_cosineDistance_tfidf).drop(axis=0, index=[id_song]).head(top)
+async def getTopResults(artist: str, track: str, top: int, vectorData: str, simFunction: str):
 
-    
+    print("Get Top results for ", artist, " ",track)
+    print("Using vectorData: ", vectorData, " and similarity function: ", simFunction)
+    id_song = getSongIdByQuery(artist, track)
+    distanceToSongs(id_song, similarityFunctions[simFunction] , queryDistances[simFunction+"_"+vectorData], dataVectors[vectorData])
+    querySong = getTopValues(id_song, queryDistances[simFunction+"_"+vectorData]).loc[id_song]
+    topValues = getTopValues(id_song, queryDistances[simFunction+"_"+vectorData]).drop(axis=0, index=[id_song]).head(top)
+
     return { "song": querySong, "top": topValues }
+
+@app.get("/metrics/")
+async def getEvaluationMetrics(vectorData: str, simFunction: str, k:int):
+    print("Get metrics for vectorData:", vectorData, "Using similarity funtion", simFunction)
+
+    # MAP
+    pk = meanAveragePrecision(queryDistances[simFunction+"_"+vectorData], k)
+    # p100 = meanAveragePrecision(queryDistances[simFunction+"_"+vectorData], 100)
+    print("MAP@"+str(k), pk)
+    # print("MAP@100 :", p100)
+
+    # MRR
+    mrrk = meanReciprocalRank(queryDistances[simFunction+"_"+vectorData], k)
+    # mrr100 = meanReciprocalRank(queryDistances[simFunction+"_"+vectorData], 100)
+    print("MRR@"+str(k), mrrk)
+    # print("MRR@100 :", mrr100)
+
+    # NDCG
+    _, ndcgk = ndcgMean(queryDistances[simFunction+"_"+vectorData], k)
+    # _, ndcg100 = ndcgMean(queryDistances[simFunction+"_"+vectorData], 100)
+    print("Mean NDCG@"+str(k), ndcgk)
+    # print("NDCG@100 :", ndcg100)
+
+    return { "SIM": simFunction, "vectorData": vectorData, "MAP" : pk, "MRR" : mrrk, "NDCG" : ndcgk }
