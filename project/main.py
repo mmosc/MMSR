@@ -166,12 +166,9 @@ def ndcgMean(dfQueries, topNumber):
         else:
             ndcg.append(dcg / idcg)
 #         print(dcg, idcg)
-      
-        
     return (ndcg, np.mean(ndcg))
 
 
-    
 # Dataframes with the data provided
 tf_idf = pd.read_table(file_tfidf, index_col="id")
 word2vec = pd.read_table(file_word2vec, index_col='id')
