@@ -16,30 +16,30 @@ file_bert = "./../MMSR_WT22_Task1_Data/id_bert_mmsr.tsv"
 file_genres = "./../MMSR_WT22_Task1_Data/id_genres_mmsr.tsv"
 file_info = "./../MMSR_WT22_Task1_Data/id_information_mmsr.tsv"
 
-csv_topIdsFiles = {
-    "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
-    "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf.csv',
-    "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf.csv',
-    "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec.csv',
-    "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec.csv',
-    "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec.csv',
-    "cosineSim_bert" : './topIds/top_ids_cosine_bert.csv',
-    "innerProduct_bert" : './topIds/top_ids_innerProduct_bert.csv',
-    "jaccardSim_bert" : './topIds/top_ids_jaccard_bert.csv',
-}
+# csv_topIdsFiles = {
+#     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
+#     "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf.csv',
+#     "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf.csv',
+#     "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec.csv',
+#     "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec.csv',
+#     "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec.csv',
+#     "cosineSim_bert" : './topIds/top_ids_cosine_bert.csv',
+#     "innerProduct_bert" : './topIds/top_ids_innerProduct_bert.csv',
+#     "jaccardSim_bert" : './topIds/top_ids_jaccard_bert.csv',
+# }
 
 ## Complete files
-# csv_topIdsFiles = {
-#     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf_complete.csv',
-#     "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf_complete.csv',
-#     "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf_complete.csv',
-#     "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec_complete.csv',
-#     "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec_complete.csv',
-#     "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec_complete.csv',
-#     "cosineSim_bert" : './topIds/top_ids_cosine_bert_complete.csv',
-#     "innerProduct_bert" : './topIds/top_ids_innerProduct_bert_complete.csv',
-#     "jaccardSim_bert" : './topIds/top_ids_jaccard_bert_complete.csv',
-# }
+csv_topIdsFiles = {
+    "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf_complete.csv',
+    "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf_complete.csv',
+    "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf_complete.csv',
+    "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec_complete.csv',
+    "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec_complete.csv',
+    "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec_complete.csv',
+    "cosineSim_bert" : './topIds/top_ids_cosine_bert_complete.csv',
+    "innerProduct_bert" : './topIds/top_ids_innerProduct_bert_complete.csv',
+    "jaccardSim_bert" : './topIds/top_ids_jaccard_bert_complete.csv',
+}
 
 # Improved  similarities calculation
 def get_cosine_similarity(arr_a: np.array, arr_b: np.array):
