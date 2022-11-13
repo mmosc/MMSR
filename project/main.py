@@ -32,16 +32,29 @@ file_bert = "./../MMSR_WT22_Task1_Data/id_bert_mmsr.tsv"
 file_genres = "./../MMSR_WT22_Task1_Data/id_genres_mmsr.tsv"
 file_info = "./../MMSR_WT22_Task1_Data/id_information_mmsr.tsv"
 
+# csv_topIdsFiles = {
+#     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
+#     "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf.csv',
+#     "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf.csv',
+#     "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec.csv',
+#     "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec.csv',
+#     "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec.csv',
+#     "cosineSim_bert" : './topIds/top_ids_cosine_bert.csv',
+#     "innerProduct_bert" : './topIds/top_ids_innerProduct_bert.csv',
+#     "jaccardSim_bert" : './topIds/top_ids_jaccard_bert.csv',
+# }
+
+## Complete files
 csv_topIdsFiles = {
-    "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
-    "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf.csv',
-    "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf.csv',
-    "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec.csv',
-    "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec.csv',
-    "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec.csv',
-    "cosineSim_bert" : './topIds/top_ids_cosine_bert.csv',
-    "innerProduct_bert" : './topIds/top_ids_innerProduct_bert.csv',
-    "jaccardSim_bert" : './topIds/top_ids_jaccard_bert.csv',
+    "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf_complete.csv',
+    "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf_complete.csv',
+    "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf_complete.csv',
+    "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec_complete.csv',
+    "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec_complete.csv',
+    "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec_complete.csv',
+    "cosineSim_bert" : './topIds/top_ids_cosine_bert_complete.csv',
+    "innerProduct_bert" : './topIds/top_ids_innerProduct_bert_complete.csv',
+    "jaccardSim_bert" : './topIds/top_ids_jaccard_bert_complete.csv',
 }
 
 def saveDataToFile():
@@ -58,22 +71,40 @@ def saveDataToFile():
     df_innerProductDistance_bert.to_csv(file_innerProductDistance_bert, sep=',')
     df_jaccardDistance_bert.to_csv(file_jaccardDistance_bert, sep=',')
 
-# Definition of functions
-def cosine_similarity(d1, d2):
-    divisor = np.linalg.norm(d1) * np.linalg.norm(d2)
-    if divisor == 0:
-        return 0
-    return (d1 @ d2) / divisor
+# Improved  similarities calculation
+def get_cosine_similarity(arr_a: np.array, arr_b: np.array):
+    def func(d1, d2, divisor):
+        return np.divide(d1 @ d2, divisor, np.zeros_like(divisor), where=divisor > 0)
 
-def inner_product(d1, d2):
-    return (d1 @ d2)    
+    norms_a = np.linalg.norm(arr_a, axis=-1)
+    norms_b = np.linalg.norm(arr_b, axis=-1) # todo why doesn't norms[indicies_test] work here?
 
-# I am not sure if it is correct
-def jaccard_formulation(d1, d2):
-    divisor = np.linalg.norm(d1) + np.linalg.norm(d2) - (d1 @ d2)
-    if divisor == 0:
-        return 0
-    return (d1 @ d2) / divisor
+    r = np.zeros((len(arr_a), len(arr_b)))
+    for index, sample in enumerate(tqdm(arr_b)):
+        print(index)
+        r[:, index] = func(arr_a, sample, norms_a * norms_b[index])
+
+    return r
+
+def get_jaccard_similarity(arr_a: np.array, arr_b: np.array):
+    def func(d1, d2, divisor):
+        d1_d2_product = d1 @ d2
+        return np.divide(d1_d2_product, divisor - d1_d2_product, np.zeros_like(divisor), where=divisor > 0)
+
+    norms_a = np.linalg.norm(arr_a, axis=-1)
+    norms_b = np.linalg.norm(arr_b, axis=-1) # todo why doesn't norms[indicies_test] work here?
+
+    r = np.zeros((len(arr_a), len(arr_b)))
+    for index, sample in enumerate(tqdm(arr_b)):
+        r[:, index] = func(arr_a, sample, norms_a + norms_b[index])
+
+    return r
+def get_innerProduct_similarity(arr_a: np.array, arr_b: np.array):
+    r = np.zeros((len(arr_a), len(arr_b)))
+    for index, sample in enumerate(tqdm(arr_b)):
+        r[:, index] = arr_a @ sample 
+    return r  
+   
 
 def getSongIdByQuery(artist, track):
     id_ = info[(info['artist'] == artist) & (info['song'] == track)]
@@ -81,22 +112,18 @@ def getSongIdByQuery(artist, track):
         return None
     return id_.index.values[0]
 
-def distanceToSongs(idSong, similarity_function, df, features_vector):
+def distanceToSongsImproved(idSong, similarity_function, df, features_vector):
     if idSong in df.columns.values:
         print("Already in data")
     else:
-        print("Calculating similarities")
-        songs = features_vector.index.values
-        distances = [similarity_function(features_vector.loc[idSong], features_vector.loc[song]) for index,song in enumerate(songs)]
-        df[idSong]  = distances 
-        saveDataToFile()    
+        print("Calculating distances")
+        features_vector.loc[idSong].values
+        distances = similarity_function(features_vector.to_numpy(), features_vector.loc[idSong].values.reshape(-1,1).T).T[0]
+        df[idSong]  = distances   
 
 def getTopValues(idSong, df_metricUsed):
     top_values = df_metricUsed[idSong].sort_values(ascending=False)
     return genres.loc[top_values.index].join(info, on="id", how="left")
-
-
-
 
 # Helpers for evaluation
 def get_genres(field):
@@ -294,10 +321,11 @@ dataVectors = {
     "word2vec" : word2vec
 }
 
+# IMPROVED VERSIONS
 similarityFunctions = {
-    "cosineSim" : cosine_similarity,
-    "innerProduct" : inner_product,
-    "jaccardSim" : jaccard_formulation
+    "cosineSim" : get_cosine_similarity,
+    "innerProduct" : get_innerProduct_similarity,
+    "jaccardSim" : get_jaccard_similarity
 }
 
 queryDistances = {
@@ -390,7 +418,8 @@ async def getTopResults(artist: str, track: str, top: int, vectorData: str, simF
         print('\nQuery already in Top ids file')
     else:
         print('\nNew song, calculating top 100 similar songs and saving to data')
-        distanceToSongs(id_song, similarityFunctions[simFunction] , queryDistances[simFunction+"_"+vectorData], dataVectors[vectorData])
+        # distanceToSongs(id_song, similarityFunctions[simFunction] , queryDistances[simFunction+"_"+vectorData], dataVectors[vectorData])
+        distanceToSongsImproved(id_song, similarityFunctions[simFunction] , queryDistances[simFunction+"_"+vectorData], dataVectors[vectorData])
         print("Actual number of records:", len(topIdsFiles[simFunction+"_"+vectorData].index))
         # Add new record to top id file
         topIdsFiles[simFunction+"_"+vectorData].loc[id_song] = queryDistances[simFunction+"_"+vectorData][[id_song]].drop(axis=0, index=[id_song]).sort_values(by=id_song,ascending=False).head(100).index.values
