@@ -9,22 +9,6 @@ from os.path import exists
 import re
 from tqdm import tqdm
 
-# Define constants for file names
-# TFIDF
-file_cosineDistance_tfidf = 'cosine_distances_tfidf.csv'
-file_innerProductDistance_tfidf = 'innerProduct_distances_tfidf.csv'
-file_jaccardDistance_tfidf = 'jaccard_distances_tfidf.csv'
-
-# WORD2VEC
-file_cosineDistance_word2vec = 'cosine_distances_word2vec.csv'
-file_innerProductDistance_word2vec = 'innerProduct_distances_word2vec.csv'
-file_jaccardDistance_word2vec = 'jaccard_distances_word2vec.csv'
-
-# BERT
-file_cosineDistance_bert = 'cosine_distances_bert.csv'
-file_innerProductDistance_bert = 'innerProduct_distances_bert.csv'
-file_jaccardDistance_bert = 'jaccard_distances_bert.csv'
-
 # DATA FILES PROVIDED
 file_tfidf = "./../MMSR_WT22_Task1_Data/id_lyrics_tf-idf_mmsr.tsv"
 file_word2vec = "./../MMSR_WT22_Task1_Data/id_lyrics_word2vec_mmsr.tsv"
@@ -32,44 +16,30 @@ file_bert = "./../MMSR_WT22_Task1_Data/id_bert_mmsr.tsv"
 file_genres = "./../MMSR_WT22_Task1_Data/id_genres_mmsr.tsv"
 file_info = "./../MMSR_WT22_Task1_Data/id_information_mmsr.tsv"
 
-# csv_topIdsFiles = {
-#     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
-#     "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf.csv',
-#     "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf.csv',
-#     "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec.csv',
-#     "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec.csv',
-#     "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec.csv',
-#     "cosineSim_bert" : './topIds/top_ids_cosine_bert.csv',
-#     "innerProduct_bert" : './topIds/top_ids_innerProduct_bert.csv',
-#     "jaccardSim_bert" : './topIds/top_ids_jaccard_bert.csv',
-# }
-
-## Complete files
 csv_topIdsFiles = {
-    "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf_complete.csv',
-    "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf_complete.csv',
-    "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf_complete.csv',
-    "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec_complete.csv',
-    "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec_complete.csv',
-    "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec_complete.csv',
-    "cosineSim_bert" : './topIds/top_ids_cosine_bert_complete.csv',
-    "innerProduct_bert" : './topIds/top_ids_innerProduct_bert_complete.csv',
-    "jaccardSim_bert" : './topIds/top_ids_jaccard_bert_complete.csv',
+    "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
+    "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf.csv',
+    "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf.csv',
+    "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec.csv',
+    "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec.csv',
+    "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec.csv',
+    "cosineSim_bert" : './topIds/top_ids_cosine_bert.csv',
+    "innerProduct_bert" : './topIds/top_ids_innerProduct_bert.csv',
+    "jaccardSim_bert" : './topIds/top_ids_jaccard_bert.csv',
 }
 
-def saveDataToFile():
-    print("Saving data to files")
-    df_cosineDistance_tfidf.to_csv(file_cosineDistance_tfidf,sep=',')
-    df_innerProductDistance_tfidf.to_csv(file_innerProductDistance_tfidf,sep=',')
-    df_jaccardDistance_tfidf.to_csv(file_jaccardDistance_tfidf,sep=',')
-   
-    df_cosineDistance_word2vec.to_csv(file_cosineDistance_word2vec,sep=',')
-    df_innerProductDistance_word2vec.to_csv(file_innerProductDistance_word2vec,sep=',')
-    df_jaccardDistance_word2vec.to_csv(file_jaccardDistance_word2vec,sep=',')
-
-    df_cosineDistance_bert.to_csv(file_cosineDistance_bert, sep=',')
-    df_innerProductDistance_bert.to_csv(file_innerProductDistance_bert, sep=',')
-    df_jaccardDistance_bert.to_csv(file_jaccardDistance_bert, sep=',')
+## Complete files
+# csv_topIdsFiles = {
+#     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf_complete.csv',
+#     "innerProduct_tfidf" : './topIds/top_ids_innerProduct_tfidf_complete.csv',
+#     "jaccardSim_tfidf" : './topIds/top_ids_jaccard_tfidf_complete.csv',
+#     "cosineSim_word2vec" : './topIds/top_ids_cosine_word2vec_complete.csv',
+#     "innerProduct_word2vec" : './topIds/top_ids_innerProduct_word2vec_complete.csv',
+#     "jaccardSim_word2vec" : './topIds/top_ids_jaccard_word2vec_complete.csv',
+#     "cosineSim_bert" : './topIds/top_ids_cosine_bert_complete.csv',
+#     "innerProduct_bert" : './topIds/top_ids_innerProduct_bert_complete.csv',
+#     "jaccardSim_bert" : './topIds/top_ids_jaccard_bert_complete.csv',
+# }
 
 # Improved  similarities calculation
 def get_cosine_similarity(arr_a: np.array, arr_b: np.array):
@@ -258,62 +228,24 @@ bert = pd.read_table(file_bert, index_col='id')
 genres = pd.read_table(file_genres, index_col="id")
 info = pd.read_table(file_info, index_col="id")
 
+
+
 # The index depends in the features vector, so it is better to assign 
 # it depending on which feature vector we are using
 # change to bert.index or word2vec.index
-index_values = tf_idf.index
 
-if exists('cosine_distances_tfidf.csv'):
-    df_cosineDistance_tfidf = pd.read_csv("cosine_distances_tfidf.csv", index_col="id")
-else:
-    df_cosineDistance_tfidf = pd.DataFrame(index=index_values)
-    
-if exists('innerProduct_distances_tfidf.csv'):
-    df_innerProductDistance_tfidf = pd.read_csv("innerProduct_distances_tfidf.csv", index_col="id")
-else:
-    df_innerProductDistance_tfidf = pd.DataFrame(index=index_values)
-    
-if exists('jaccard_distances_tfidf.csv'):
-    df_jaccardDistance_tfidf = pd.read_csv("jaccard_distances_tfidf.csv", index_col="id")
-else:
-    df_jaccardDistance_tfidf = pd.DataFrame(index=index_values)
-    
-    
-index_values = word2vec.index
+# Data frames to store temp the distances
+df_cosineDistance_tfidf = pd.DataFrame(index=tf_idf.index)
+df_innerProductDistance_tfidf = pd.DataFrame(index=tf_idf.index)
+df_jaccardDistance_tfidf = pd.DataFrame(index=tf_idf.index)
 
-if exists('cosine_distances_word2vec.csv'):
-    df_cosineDistance_word2vec = pd.read_csv("cosine_distances_word2vec.csv", index_col="id")
-else:
-    df_cosineDistance_word2vec = pd.DataFrame(index=index_values)
-    
-if exists('innerProduct_distances_word2vec.csv'):
-    df_innerProductDistance_word2vec = pd.read_csv("innerProduct_distances_word2vec.csv", index_col="id")
-else:
-    df_innerProductDistance_word2vec = pd.DataFrame(index=index_values)
-    
-if exists('jaccard_distances_word2vec.csv'):
-    df_jaccardDistance_word2vec = pd.read_csv("jaccard_distances_word2vec.csv", index_col="id")
-else:
-    df_jaccardDistance_word2vec = pd.DataFrame(index=index_values)
-    
-    
-index_values = bert.index
+df_cosineDistance_word2vec = pd.DataFrame(index=word2vec.index) 
+df_innerProductDistance_word2vec = pd.DataFrame(index=word2vec.index)  
+df_jaccardDistance_word2vec = pd.DataFrame(index=word2vec.index)
 
-if exists('cosine_distances_bert.csv'):
-    df_cosineDistance_bert = pd.read_csv("cosine_distances_bert.csv", index_col="id")
-else:
-    df_cosineDistance_bert = pd.DataFrame(index=index_values)
-    
-if exists('innerProduct_distances_bert.csv'):
-    df_innerProductDistance_bert = pd.read_csv("innerProduct_distances_bert.csv", index_col="id")
-else:
-    df_innerProductDistance_bert = pd.DataFrame(index=index_values)
-    
-if exists('jaccard_distances_bert.csv'):
-    df_jaccardDistance_bert = pd.read_csv("jaccard_distances_bert.csv", index_col="id")
-else:
-    df_jaccardDistance_bert = pd.DataFrame(index=index_values)
-
+df_cosineDistance_bert = pd.DataFrame(index=bert.index)    
+df_innerProductDistance_bert = pd.DataFrame(index=bert.index)
+df_jaccardDistance_bert = pd.DataFrame(index=bert.index)
 
 dataVectors = {
     "tfidf" : tf_idf,
