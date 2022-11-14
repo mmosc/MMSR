@@ -339,9 +339,9 @@ similarityFunctionMapping = {
 
 
 class SimilarityFunction(Enum):
-    cosineSim = "Cosine Similarity"
-    innerProduct = "Inner Product Similarity"
-    jaccardSim = "Jaccard Similarity"
+    cosineSim = "cosineSim"  # "Cosine Similarity"
+    innerProduct = "innerProduct"  # "Inner Product Similarity"
+    jaccardSim = "jaccardSim"  # "Jaccard Similarity"
 
     def to_func(self):
         return similarityFunctionMapping[self.name]
