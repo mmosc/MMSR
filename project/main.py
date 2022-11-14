@@ -1,4 +1,5 @@
 # Fastapi imports
+from enum import Enum
 from typing import Union
 from fastapi import FastAPI
 
@@ -245,18 +246,36 @@ df_cosineDistance_bert = pd.DataFrame(index=bert.index)
 df_innerProductDistance_bert = pd.DataFrame(index=bert.index)
 df_jaccardDistance_bert = pd.DataFrame(index=bert.index)
 
-dataVectors = {
+
+# Can't store panda dataframes in an enum directly
+dataVectorsMapping = {
     "tfidf" : tf_idf,
     "bert"  : bert,
     "word2vec" : word2vec
 }
 
-# IMPROVED VERSIONS
-similarityFunctions = {
+class DataVector(Enum):
+    tfidf = "tf_idf"
+    bert = "bert"
+    word2vec = "word2vec"
+
+    def to_df(self):
+        return dataVectorsMapping[self.name]
+
+
+similarityFunctionMapping = {
     "cosineSim" : get_cosine_similarity,
     "innerProduct" : get_innerProduct_similarity,
     "jaccardSim" : get_jaccard_similarity
 }
+
+class SimilarityFunction(Enum):
+    cosineSim = "Cosine Similarity"
+    innerProduct = "Inner Product Similarity"
+    jaccardSim = "Jaccard Similarity"
+
+    def to_func(self):
+        return similarityFunctionMapping[self.name]
 
 queryDistances = {
     "cosineSim_tfidf" : df_cosineDistance_tfidf,
@@ -333,56 +352,55 @@ topIdsFiles = {
 app = FastAPI()
 
 @app.get("/query/")
-async def getTopResults(artist: str, track: str, top: int, vectorData: str, simFunction: str):
+async def getTopResults(artist: str, track: str, top: int, vectorData: DataVector, simFunction: SimilarityFunction):
+    print("Get Top results for \n\tArtist: ", artist, " \n\tTrack:",track, "\nUsing \n\tvectorData: ", vectorData.name, "\n\tsimilarity function: ", simFunction.name)
 
-    
-    print("Get Top results for \n\tArtist: ", artist, " \n\tTrack:",track, "\nUsing \n\tvectorData: ", vectorData, "\n\tsimilarity function: ", simFunction)
     id_song = getSongIdByQuery(artist, track)
     if id_song == None:
         return { "error" : "No record found for this query"}
+
     print("\nId song:", id_song)
     # print(top_jaccard_word2vec.head())
 
-    if id_song in  topIdsFiles[simFunction+"_"+vectorData].index.values:
-        # topValues = getTopIds(id_song,  topIdsFiles[simFunction+"_"+vectorData])
+    file_id = simFunction.name + "_" + vectorData.name
+
+    if id_song in  topIdsFiles[file_id].index.values:
+        # topValues = getTopIds(id_song,  topIdsFiles[file_id])
         print('\nQuery already in Top ids file')
     else:
         print('\nNew song, calculating top 100 similar songs and saving to data')
-        # distanceToSongs(id_song, similarityFunctions[simFunction] , queryDistances[simFunction+"_"+vectorData], dataVectors[vectorData])
-        distanceToSongsImproved(id_song, similarityFunctions[simFunction] , queryDistances[simFunction+"_"+vectorData], dataVectors[vectorData])
-        print("Actual number of records:", len(topIdsFiles[simFunction+"_"+vectorData].index))
+        # distanceToSongs(id_song, simFunction , queryDistances[file_id], vectorData)
+        distanceToSongsImproved(id_song, simFunction.to_func(), queryDistances[file_id], vectorData.to_df())
+        print("Actual number of records:", len(topIdsFiles[file_id].index))
         # Add new record to top id file
-        topIdsFiles[simFunction+"_"+vectorData].loc[id_song] = queryDistances[simFunction+"_"+vectorData][[id_song]].drop(axis=0, index=[id_song]).sort_values(by=id_song,ascending=False).head(100).index.values
-        print("New number of records:", len(topIdsFiles[simFunction+"_"+vectorData].index))
-        print("Writting to:", csv_topIdsFiles[simFunction+"_"+vectorData])
+        topIdsFiles[file_id].loc[id_song] = queryDistances[file_id][[id_song]].drop(axis=0, index=[id_song]).sort_values(by=id_song,ascending=False).head(100).index.values
+        print("New number of records:", len(topIdsFiles[file_id].index))
+        print("Writting to:", csv_topIdsFiles[file_id])
         # Update top id file in csv
-        topIdsFiles[simFunction+"_"+vectorData].to_csv(csv_topIdsFiles[simFunction+"_"+vectorData])
+        topIdsFiles[file_id].to_csv(csv_topIdsFiles[file_id])
 
     query_song = genres.loc[[id_song]].join(info, on="id", how="left")
-    topVal = genres.loc[ topIdsFiles[simFunction+"_"+vectorData].loc[id_song].values].join(info, on="id", how="left").head(top)
+    topVal = genres.loc[ topIdsFiles[file_id].loc[id_song].values].join(info, on="id", how="left").head(top)
 
     return { "song": query_song , "top": topVal }
 
 @app.get("/metrics/")
-async def getEvaluationMetrics(vectorData: str, simFunction: str, k:int):
-    print("Get metrics for vectorData:", vectorData, "Using similarity funtion", simFunction)
+async def getEvaluationMetrics(vectorData: DataVector, simFunction: SimilarityFunction, k:int):
+    print("Get metrics for vectorData:", vectorData, "Using similarity funtion", simFunction.name)
 
-    pk, mrrk, ndcgk = getMetrics(topIdsFiles[simFunction+"_"+vectorData], k)
+    file_id = simFunction.name + "_" + vectorData.name
+
+    pk, mrrk, ndcgk = getMetrics(topIdsFiles[file_id], k)
     # MAP
-    # pk = meanAveragePrecision( topIdsFiles[simFunction+"_"+vectorData], k)
+    # pk = meanAveragePrecision( topIdsFiles[file_id], k)
     print("MAP@"+str(k), pk)
-    
 
     # # MRR
-    # mrrk = meanReciprocalRank(topIdsFiles[simFunction+"_"+vectorData], k)
+    # mrrk = meanReciprocalRank(topIdsFiles[file_id], k)
     print("MRR@"+str(k), mrrk)
-    
 
     # # NDCG
-    # _, ndcgk = ndcgMean(topIdsFiles[simFunction+"_"+vectorData], k)
+    # _, ndcgk = ndcgMean(topIdsFiles[file_id], k)
     print("Mean NDCG@"+str(k), ndcgk)
 
-   
-  
-   
-    return { "SIM": simFunction, "vectorData": vectorData, "MAP" : pk, "MRR" : mrrk, "NDCG" : ndcgk }
+    return { "SIM": simFunction.to_func(), "vectorData": vectorData.to_df(), "MAP" : pk, "MRR" : mrrk, "NDCG" : ndcgk }
