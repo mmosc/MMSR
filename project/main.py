@@ -11,11 +11,11 @@ import re
 from tqdm import tqdm
 
 # DATA FILES PROVIDED
-file_tfidf = "./../MMSR_WT22_Task1_Data/id_lyrics_tf-idf_mmsr.tsv"
-file_word2vec = "./../MMSR_WT22_Task1_Data/id_lyrics_word2vec_mmsr.tsv"
-file_bert = "./../MMSR_WT22_Task1_Data/id_bert_mmsr.tsv"
-file_genres = "./../MMSR_WT22_Task1_Data/id_genres_mmsr.tsv"
-file_info = "./../MMSR_WT22_Task1_Data/id_information_mmsr.tsv"
+file_tfidf = "./../MMSR_WT22_Task2_Data/id_lyrics_tf-idf_mmsr.tsv"
+file_word2vec = "./../MMSR_WT22_Task2_Data/id_lyrics_word2vec_mmsr.tsv"
+file_bert = "./../MMSR_WT22_Task2_Data/id_lyrics_bert_mmsr.tsv"
+file_genres = "./../MMSR_WT22_Task2_Data/id_genres_mmsr.tsv"
+file_info = "./../MMSR_WT22_Task2_Data/id_information_mmsr.tsv"
 
 # csv_topIdsFiles = {
 #     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',
@@ -44,18 +44,26 @@ csv_topIdsFiles = {
 
 # Improved  similarities calculation
 def get_cosine_similarity(arr_a: np.array, arr_b: np.array):
-    def func(d1, d2, divisor):
-        return np.divide(d1 @ d2, divisor, np.zeros_like(divisor), where=divisor > 0)
+#     def func(d1, d2, divisor):
+#         return np.divide(d1 @ d2, divisor, np.zeros_like(divisor), where=divisor > 0)
 
-    norms_a = np.linalg.norm(arr_a, axis=-1)
-    norms_b = np.linalg.norm(arr_b, axis=-1) # todo why doesn't norms[indicies_test] work here?
+#     norms_a = np.linalg.norm(arr_a, axis=-1)
+#     norms_b = np.linalg.norm(arr_b, axis=-1) # todo why doesn't norms[indicies_test] work here?
 
-    r = np.zeros((len(arr_a), len(arr_b)))
-    for index, sample in enumerate(tqdm(arr_b)):
-        print(index)
-        r[:, index] = func(arr_a, sample, norms_a * norms_b[index])
+#     r = np.zeros((len(arr_a), len(arr_b)))
+#     for index, sample in enumerate(tqdm(arr_b)):
+#         #print(index)
+#         r[:, index] = func(arr_a, sample, norms_a * norms_b[index])
+#     return r
 
+    # Richi: this is faster since we do not need a loop
+    norms_a = np.linalg.norm(arr_a, axis=-1)[:, np.newaxis]
+    norms_b = np.linalg.norm(arr_b, axis=-1)[:, np.newaxis]
+    divisor = norms_a * norms_b.T
+    dotp = arr_a @ arr_b.T
+    r = np.divide(dotp, divisor, np.zeros_like(divisor), where=divisor > 0)
     return r
+
 
 def get_jaccard_similarity(arr_a: np.array, arr_b: np.array):
     def func(d1, d2, divisor):
