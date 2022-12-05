@@ -115,17 +115,17 @@ def isResultRelevant(songOneGenres, songTwoGenres):
 def meanAveragePrecision(dfTopIds, topNumber):
     
     AP_ = []
-    for idx, queryId in enumerate(dfTopIds.index.values):
-        topIds = dfTopIds.loc[queryId].values
-        querySong = genres.loc[[queryId]].join(info, on="id", how="left").head(topNumber)
-        topSongs = genres.loc[topIds].join(info, on="id", how="left").head(topNumber)
-        relevant_results = [isResultRelevant(querySong['genre'].values[0], genres) for genres in topSongs['genre'].values]
+    for queryId in tqdm(dfTopIds.index.values):
+        
+        topIds = dfTopIds.loc[queryId].values[:topNumber]
+        querySongGenres = genres.loc[[queryId], 'genre'].values[0]
+        topSongsGenres = genres.loc[topIds, 'genre'].values
+        relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
         REL = np.sum(relevant_results)
-        # print([relevant_results[i] * (np.sum(relevant_results[:i+1]) / (i+1))   for i in range(topNumber)])
         if REL == 0: # Case when there is no relevant result in the top@K
             AP = 0
         else:
-            AP = (1/REL) * np.sum([relevant_results[i] * (np.sum(relevant_results[:i+1]) / (i+1))   for i in range(topNumber)])
+            AP = (1/REL) * np.sum([relevant_results[i] * (np.sum(relevant_results[:i+1]) / (i+1)) for i in range(topNumber)])
         
         AP_.append(AP)
         
@@ -133,22 +133,19 @@ def meanAveragePrecision(dfTopIds, topNumber):
 
 def meanReciprocalRank(dfTopIds, topNumber):
     RR = []
-    for idx, queryId in enumerate(dfTopIds.index.values):
-        topIds = dfTopIds.loc[queryId].values
-        querySong = genres.loc[[queryId]].join(info, on="id", how="left").head(topNumber)
-        topSongs = genres.loc[topIds].join(info, on="id", how="left").head(topNumber)
-        # Get if each of the results are relevant, if yes is True
-        # Array containing for each result if it is relevant or not eg. Top5 [True, True, False, True, False]   
-        relevant_results = [isResultRelevant(querySong['genre'].values[0], genres) for genres in topSongs['genre'].values]
-#         print(relevant_results)
+    for queryId in tqdm(dfTopIds.index.values):
         
+        topIds = dfTopIds.loc[queryId].values[:topNumber]
+        querySongGenres = genres.loc[[queryId], 'genre'].values[0]
+        topSongsGenres = genres.loc[topIds, 'genre'].values
+        relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
+
         if True in relevant_results:
             min_idx_rel = relevant_results.index(True) + 1
             RR.append(1/min_idx_rel)
         else: # Case when there is no relevant result in the top@K
             RR.append(0)
-            
-        # print(min_idx_rel)
+
        
     return np.mean(RR)
 
@@ -168,20 +165,18 @@ def meanReciprocalRank(dfTopIds, topNumber):
 def ndcgMean(dfTopIds, topNumber):
     ndcg = []
 
-    for idx, queryId in enumerate(dfTopIds.index.values):
-        topIds = dfTopIds.loc[queryId].values
-        querySong = genres.loc[[queryId]].join(info, on="id", how="left").head(topNumber)
-        topSongs = genres.loc[topIds].join(info, on="id", how="left").head(topNumber)
-        # Get if each of the results are relevant, if yes is True
-        # Array containing for each result if it is relevant or not eg. Top5 [True, True, False, True, False]   
-        relevant_results = [isResultRelevant(querySong['genre'].values[0], genres) for genres in topSongs['genre'].values]
+    for queryId in tqdm(dfTopIds.index.values):
+        
+        topIds = dfTopIds.loc[queryId].values[:topNumber]
+        querySongGenres = genres.loc[[queryId], 'genre'].values[0]
+        topSongsGenres = genres.loc[topIds, 'genre'].values
+        
+        relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
         sorted_results = sorted(relevant_results, reverse=True)
-        # print(relevant_results)
-        # print(sorted_results)
-        # print(".........")
+
         dcg = np.sum([ res/np.log2(i+1) if i+1 > 1 else float(res) for i,res in enumerate(relevant_results)])
-        # print([ res/np.log2(i+1) if i+1 > 1 else float(res) for i,res in enumerate(relevant_results)])
         idcg = np.sum([ res/np.log2(i+1) if i+1 > 1 else float(res) for i,res in enumerate(sorted_results)])
+        
         if idcg == 0: # Case when there is no relevant result in the top@K
             ndcg.append(0)
         else:
@@ -195,11 +190,13 @@ def getMetrics(dfTopIds, topNumber):
     AP_ = []
     ndcg = []
 
-    for idx, queryId in tqdm(enumerate(dfTopIds.index.values)):
-        topIds = dfTopIds.loc[queryId].values
-        querySong = genres.loc[[queryId]].join(info, on="id", how="left").head(topNumber)
-        topSongs = genres.loc[topIds].join(info, on="id", how="left").head(topNumber)
-        relevant_results = [isResultRelevant(querySong['genre'].values[0], genres) for genres in topSongs['genre'].values]
+    for queryId in tqdm(dfTopIds.index.values):
+        
+        topIds = dfTopIds.loc[queryId].values[:topNumber]
+        querySongGenres = genres.loc[[queryId], 'genre'].values[0]
+        topSongsGenres = genres.loc[topIds, 'genre'].values
+        
+        relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
         sorted_results = sorted(relevant_results, reverse=True)
 
         # MAP
