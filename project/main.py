@@ -125,7 +125,8 @@ def meanAveragePrecision(dfTopIds, topNumber):
         if REL == 0: # Case when there is no relevant result in the top@K
             AP = 0
         else:
-            AP = (1/REL) * np.sum([relevant_results[i] * (np.sum(relevant_results[:i+1]) / (i+1)) for i in range(topNumber)])
+#             AP = (1/REL) * np.sum([relevant_results[i] * (np.sum(relevant_results[:i+1]) / (i+1)) for i in range(topNumber)])
+            AP = (1/REL) * np.sum(np.multiply(relevant_results, np.divide(np.cumsum(relevant_results,axis=0), np.arange(1,topNumber+1))))
         
         AP_.append(AP)
         
@@ -204,7 +205,7 @@ def getMetrics(dfTopIds, topNumber):
         if REL == 0: # Case when there is no relevant result in the top@K
             AP = 0
         else:
-            AP = (1/REL) * np.sum([relevant_results[i] * (np.sum(relevant_results[:i+1]) / (i+1))   for i in range(topNumber)])
+            AP = (1/REL) * np.sum(np.multiply(relevant_results, np.divide(np.cumsum(relevant_results,axis=0), np.arange(1,topNumber+1))))
         AP_.append(AP)
 
         # MRR
