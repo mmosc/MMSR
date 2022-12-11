@@ -11,11 +11,11 @@ import re
 from tqdm import tqdm
 
 # DATA FILES PROVIDED
-file_tfidf = "./../MMSR_WT22_Task2_Data/id_lyrics_tf-idf_mmsr.tsv"
-file_word2vec = "./../MMSR_WT22_Task2_Data/id_lyrics_word2vec_mmsr.tsv"
-file_bert = "./../MMSR_WT22_Task2_Data/id_lyrics_bert_mmsr.tsv"
-file_genres = "./../MMSR_WT22_Task2_Data/id_genres_mmsr.tsv"
-file_info = "./../MMSR_WT22_Task2_Data/id_information_mmsr.tsv"
+file_tfidf = "./../task2/id_lyrics_tf-idf_mmsr.tsv"
+file_word2vec = "./../task2/id_lyrics_word2vec_mmsr.tsv"
+file_bert = "./../task2/id_lyrics_bert_mmsr.tsv"
+file_genres = "./../task2/id_genres_mmsr.tsv"
+file_info = "./../task2/id_information_mmsr.tsv"
 
 # csv_topIdsFiles = {
 #     "cosineSim_tfidf" : './topIds/top_ids_cosine_tfidf.csv',

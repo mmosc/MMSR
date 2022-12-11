@@ -6,10 +6,13 @@ Link to report: https://www.overleaf.com/read/hjvjcvffndyf
 ## Files included
 | File | Description |
 |--- | --- |
+| `./project/main.py` | API developed for the implementation of the project|
+| `./project/files.py`| Contains the variables that have the reference to the datasets files |
+| `./project/functions.py`| Contains the developed functions to solve the task |
 | `./project/ImplementationTask2.ipynb` | **Contains the similarity functions used**, and the implementation of the computation of the top 100 ids for each of the features.|
 | `./project/EvaluationMetrics-.ipynb` | Contains the implementation of the functions to calculate the **MAP, MRR, NDCG and Kendall Tau correlation**. And the generation of the **Precision/Recall plots.** |
 | `./project/StatisticalDataAnalysis.ipynb` | Contains the **statistical data analysis** |
-| `./project/main.py` | API developed for the implementation of the project|
+
 
 ## Todo
 
