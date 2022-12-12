@@ -1,4 +1,4 @@
-USE_COMPLETE_DATASETS = False
+USE_COMPLETE_DATASETS = True
 
 # DATA FILES PROVIDED Task1
 file_tfidf = "./../MMSR_WT22_Task1_Data/id_lyrics_tf-idf_mmsr.tsv"
