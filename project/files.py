@@ -39,6 +39,7 @@ file_incp       = "./../task2/id_incp_mmsr.tsv"
 
 if USE_COMPLETE_DATASETS:
     # Individual Features with jaccard and cosine
+    f_top_baseline          = './TopIdsTask2/top_ids_baseline_complete.csv'
     f_top_cosine_tfidf      = './TopIdsTask2/top_ids_cosine_tfidf_complete_.csv'
     f_top_cosine_word2vec   = './TopIdsTask2/top_ids_cosine_word2vec_complete_.csv'
     f_top_cosine_bert       = './TopIdsTask2/top_ids_cosine_bert_complete_.csv'
@@ -72,6 +73,7 @@ if USE_COMPLETE_DATASETS:
     f_top_jaccard_blf_vardelta_spectral  = './TopIdsTask2/top_ids_jaccard_blf_vardeltaspectral_complete.csv'
 else:
     # Individual Features with jaccard and cosine NEWS TO TEST
+    f_top_baseline          = './TopIdsTask2/top_ids_baseline_complete.csv'
     f_top_cosine_tfidf      = './TopIdsTaskGenerated/top_ids_cosine_tfidf_complete.csv'
     f_top_cosine_word2vec   = './TopIdsTaskGenerated/top_ids_cosine_word2vec_complete.csv'
     f_top_cosine_bert       = './TopIdsTaskGenerated/top_ids_cosine_bert_complete.csv'
