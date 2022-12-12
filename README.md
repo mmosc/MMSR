@@ -7,7 +7,7 @@ Link to report: https://www.overleaf.com/read/hjvjcvffndyf
 | File | Description |
 |--- | --- |
 | `./project/main.py` | API developed for the implementation of the project|
-| `./project/files.py`| Contains the variables that have the reference to the datasets files |
+| `./project/files.py`| Contains the variables that have the reference to the datasets files. Also If you want to run the project from zero, to generate the top ids while doing queries on the API change the first variable to `USE_COMPLETE_DATASETS = False` |
 | `./project/functions.py`| Contains the developed functions to solve the task |
 | `./project/ImplementationTask2.ipynb` | **Contains the similarity functions used**, and the implementation of the computation of the top 100 ids for each of the features.|
 | `./project/EvaluationMetrics-.ipynb` | Contains the implementation of the functions to calculate the **MAP, MRR, NDCG and Kendall Tau correlation**. And the generation of the **Precision/Recall plots.** |
@@ -41,18 +41,18 @@ On standard settings the Webserver can be reached on:
 
 The query parameters values should be specified as **ARTIST** the name of the artist,  **TRACK** the song of the artist, **NVALUE** the number of songs to return as similar.
 
-**VECTOR** could have 3 values *tfidf*, *word2vec* or *bert*
+**VECTOR** could be 15 values *tfidf*, *word2vec*, *bert*, *mfcc_bow*, *mfcc_stats*, *essentia*, *incp*, *resnet*, *vgg19*, *blf_delta_spectral*, *blf_correlation*, *blf_logfluc*, *blf_spectral*, *blf_spectral_contrast*, *blf_vardelta_spectral*.
 
-**SIMFUNC** could be *cosineSim*, *innerProduct* or *jaccardSim*
+**SIMFUNC** could be *cosineSim*, *jaccardSim*
 
 
 ```/metrics/?k=KVALUE&vectorData=VECTORDATA&simFunction=SIMFUNCTION```
 
 The query parameters values shoud be specified as **KVALUE** to get the @k metrics
 
-**VECTORDATA** could have 3 values *tfidf*, *word2vec* or *bert*
+**VECTORDATA** could be  15 values *tfidf*, *word2vec*, *bert*, *mfcc_bow*, *mfcc_stats*, *essentia*, *incp*, *resnet*, *vgg19*, *blf_delta_spectral*, *blf_correlation*, *blf_logfluc*, *blf_spectral*, *blf_spectral_contrast*, *blf_vardelta_spectral*.
 
-**SIMFUNCTION** could be *cosineSim*, *innerProduct* or *jaccardSim*
+**SIMFUNCTION** could be *cosineSim*, *jaccardSim*
 
 ## Data generated from the tasks:
 
