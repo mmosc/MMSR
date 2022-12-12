@@ -68,10 +68,13 @@ The Results of the query
 
 The data that was generated through the tasks is in the following links.
 
-### Task 1
-Top 100 Song id's : https://1drv.ms/u/s!AgdGFQd2-hyCiQPMTqJA4OvQ5glM?e=f8OV5W .
+https://40211-my.sharepoint.com/:f:/g/personal/eduardo0697_armandoschmitt_de/EtnNhkkSX8JBgirW8LU6Kb4BWYE0Or4kUYdbiVoQ4kdpzA
 
-This data should be placed into `./project/topIds/`
+
+### Task 1
+
+
+The data should be placed into `./project/topIds/`
 
 The data contained in this folder is:
 
@@ -89,9 +92,8 @@ The data contained in this folder is:
 
 
 ### Task 2
-Top 100 Song id's : https://1drv.ms/u/s!AgdGFQd2-hyCiQUSFLtDzvwGRVG-?e=aT7U68 .
 
-This data should be placed into `./project/TopIdsTask2/`
+The data should be placed into `./project/TopIdsTask2/`
 
 The top 100 songs id files have the following structure. `top_ids_[similarity]_[feature]_complete.csv`
 
