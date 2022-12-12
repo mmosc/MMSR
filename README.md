@@ -54,6 +54,16 @@ The query parameters values shoud be specified as **KVALUE** to get the @k metri
 
 **SIMFUNCTION** could be *cosineSim*, *jaccardSim*
 
+### Example
+
+In the next image you can see an enviroment to test the API and the availables queries. ```http://127.0.0.1:8000/docs```
+<img src="./imgs/TestAPI.png" alt="TestAPI" style="height:auto width:100%"/>
+
+An example of a query
+<img src="./imgs/TestQuery.png" alt="TestQuery" style="height:auto width:100%"/>
+The Results of the query
+<img src="./imgs/Result.png" alt="ResultQuery" style="height:auto width:100%"/>
+
 ## Data generated from the tasks:
 
 The data that was generated through the tasks is in the following links.
