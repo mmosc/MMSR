@@ -133,10 +133,38 @@ f_top_jaccard_bert_essentia_vgg19 = './TopIdsTask2/top_ids_jaccard_bert_essentia
 f_top_jaccard_bert_blf_delta_spectral_incp  = './TopIdsTask2/top_ids_jaccard_bert_blfdeltaspectral_incp_complete.csv'
 f_top_jaccard_bert_blf_delta_spectral_vgg19 = './TopIdsTask2/top_ids_jaccard_bert_blfdeltaspectral_vgg19_complete.csv'
 
+
+# Features combined []
+f_top_cosine_bert_blf_spectral_resnet = "./TopIdsFusion/top_ids_cosine_earlyfusion_bert_blf_spectral_resnet_complete.csv"
+f_top_cosine_bert_blf_spectral_incp   = "./TopIdsFusion/top_ids_cosine_earlyfusion_bert_blf_spectral_incp_complete.csv"
+f_top_cosine_bert_mfcc_bow_resnet     = "./TopIdsFusion/top_ids_cosine_earlyfusion_bert_mfcc_bow_resnet_complete.csv"
+f_top_cosine_bert_mfcc_bow_incp       = "./TopIdsFusion/top_ids_cosine_earlyfusion_bert_mfcc_bow_incp_complete.csv"
+f_top_cosine_bert_blf_logfluc_resnet  = "./TopIdsFusion/top_ids_cosine_earlyfusion_bert_blf_logfluc_resnet_complete.csv"
+f_top_cosine_bert_blf_logfluc_incp    = "./TopIdsFusion/top_ids_cosine_earlyfusion_bert_blf_logfluc_incp_complete.csv"
+f_top_cosine_tfidf_blf_spectral_resnet= "./TopIdsFusion/top_ids_cosine_earlyfusion_tfidf_blf_spectral_resnet_complete.csv"
+f_top_cosine_tfidf_blf_spectral_incp  = "./TopIdsFusion/top_ids_cosine_earlyfusion_tfidf_blf_spectral_incp_complete.csv"
+f_top_cosine_tfidf_mfcc_bow_resnet    = "./TopIdsFusion/top_ids_cosine_earlyfusion_tfidf_mfcc_bow_resnet_complete.csv"
+f_top_cosine_tfidf_mfcc_bow_incp      = "./TopIdsFusion/top_ids_cosine_earlyfusion_tfidf_mfcc_bow_incp_complete.csv"
+f_top_cosine_tfidf_blf_logfluc_resnet = "./TopIdsFusion/top_ids_cosine_earlyfusion_tfidf_blf_logfluc_resnet_complete.csv"
+f_top_cosine_tfidf_blf_logfluc_incp   = "./TopIdsFusion/top_ids_cosine_earlyfusion_tfidf_blf_logfluc_incp_complete.csv"
+
+f_top_jaccard_bert_essentia_vgg19      = "./TopIdsFusion/top_ids_jaccard_earlyfusion_bert_essentia_vgg19_complete.csv"
+f_top_jaccard_bert_essentia_resnet     = "./TopIdsFusion/top_ids_jaccard_earlyfusion_bert_essentia_resnet_complete.csv"
+f_top_jaccard_bert_blf_logfluc_vgg19   = "./TopIdsFusion/top_ids_jaccard_earlyfusion_bert_blf_logfluc_vgg19_complete.csv"
+f_top_jaccard_bert_blf_logfluc_resnet  = "./TopIdsFusion/top_ids_jaccard_earlyfusion_bert_blf_logfluc_resnet_complete.csv"
+f_top_jaccard_bert_mfcc_stats_vgg19    = "./TopIdsFusion/top_ids_jaccard_earlyfusion_bert_mfcc_stats_vgg19_complete.csv"
+f_top_jaccard_bert_mfcc_stats_resnet   = "./TopIdsFusion/top_ids_jaccard_earlyfusion_bert_mfcc_stats_resnet_complete.csv"
+f_top_jaccard_tfidf_essentia_vgg19     = "./TopIdsFusion/top_ids_jaccard_earlyfusion_tfidf_essentia_vgg19_complete.csv"
+f_top_jaccard_tfidf_essentia_resnet    = "./TopIdsFusion/top_ids_jaccard_earlyfusion_tfidf_essentia_resnet_complete.csv"
+f_top_jaccard_tfidf_blf_logfluc_vgg19  = "./TopIdsFusion/top_ids_jaccard_earlyfusion_tfidf_blf_logfluc_vgg19_complete.csv"
+f_top_jaccard_tfidf_blf_logfluc_resnet = "./TopIdsFusion/top_ids_jaccard_earlyfusion_tfidf_blf_logfluc_resnet_complete.csv"
+f_top_jaccard_tfidf_mfcc_stats_vgg19   = "./TopIdsFusion/top_ids_jaccard_earlyfusion_tfidf_mfcc_stats_vgg19_complete.csv"
+f_top_jaccard_tfidf_mfcc_stats_resnet  = "./TopIdsFusion/top_ids_jaccard_earlyfusion_tfidf_mfcc_stats_resnet_complete.csv"
+
 # Files metrics
 
-file_metrics_jaccard = './TopIdsTask2/df_metrics_jaccard.csv'
-file_metrics_cosine = './TopIdsTask2/df_metrics_cosine.csv'
+file_metrics_cosine = './TopIdsFusion/df_metrics_cosine_individual.csv'
+file_metrics_jaccard = './TopIdsFusion/df_metrics_jaccard_individual.csv'
 
 file_cosine_mean_precision_datasets = './TopIdsTask2/df_cosine_mean_precision_datasets_plot.csv'
 file_cosine_mean_recall_datasets = './TopIdsTask2/df_cosine_mean_recall_datasets_plot.csv'
@@ -151,3 +179,15 @@ file_correlations_cosine_tau = './TopIdsTask2/correlations_cosine_tau.csv'
 
 file_corr_all_values_tau_jaccard = './TopIdsTask2/corr_all_values_tau_jaccard.csv'
 file_correlations_jaccard_tau = './TopIdsTask2/correlations_jaccard_tau.csv'
+
+# Task 3
+file_metrics_earlyfusion_jaccard = './TopIdsFusion//df_metric_earlyfusion_jaccard.csv'
+file_metrics_earlyfusion_cosine =  './TopIdsFusion/df_metrics_earlyfusion_cosine.csv'
+
+file_cosine_early_mean_precision_datasets         = './TopIdsFusion/df_cosine_early_mean_precision_datasets_plot.csv'
+file_cosine_early_mean_recall_datasets            = './TopIdsFusion/df_cosine_early_mean_recall_datasets_plot.csv'
+file_cosine_early_maxprecision_precision_datasets = './TopIdsFusion/df_cosine_early_mean_maxprecision_datasets_plot.csv'
+
+file_jaccard_early_mean_precision_datasets         = './TopIdsFusion/df_jaccard_early_mean_precision_datasets_plot.csv'
+file_jaccard_early_mean_recall_datasets            = './TopIdsFusion/df_jaccard_early_mean_recall_datasets_plot.csv'
+file_jaccard_early_maxprecision_precision_datasets = './TopIdsFusion/df_jaccard_early_mean_maxprecision_datasets_plot.csv'
