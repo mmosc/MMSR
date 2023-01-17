@@ -1,15 +1,11 @@
 # Fastapi imports
 from enum import Enum
-from typing import Union
 from fastapi import FastAPI
 
 # Imports for project
 import pandas as pd
-import numpy as np
 from os.path import exists
-import re
 import datatable as dt
-from tqdm import tqdm
 from files import *
 from functions import *
 
@@ -196,8 +192,6 @@ topIdsFiles = {
     "jaccardSim_bert" : top_jaccard_bert,
     "jaccardSim_mfcc_bow": top_jaccard_mfcc_bow,
     "jaccardSim_mfcc_stats" : top_jaccard_mfcc_stats,
-    "jaccardSim_mfcc_bow" : top_jaccard_mfcc_bow,
-    "jaccardSim_mfcc_stats" : top_jaccard_mfcc_stats,
     "jaccardSim_essentia" : top_jaccard_essentia,
     "jaccardSim_blf_delta_spectral" : top_jaccard_blf_delta_spectral,
     "jaccardSim_blf_correlation" : top_jaccard_blf_correlation,
@@ -235,8 +229,6 @@ csv_topIdsFiles = {
     "jaccardSim_word2vec" : f_top_jaccard_word2vec,
     "jaccardSim_bert" : f_top_jaccard_bert,
     "jaccardSim_mfcc_bow": f_top_jaccard_mfcc_bow,
-    "jaccardSim_mfcc_stats" : f_top_jaccard_mfcc_stats,
-    "jaccardSim_mfcc_bow" : f_top_jaccard_mfcc_bow,
     "jaccardSim_mfcc_stats" : f_top_jaccard_mfcc_stats,
     "jaccardSim_essentia" : f_top_jaccard_essentia,
     "jaccardSim_blf_delta_spectral" : f_top_jaccard_blf_delta_spectral,
@@ -304,10 +296,11 @@ async def getTopResults(artist: str, track: str, top: int, vectorData: DataVecto
 
     topVal = genres.loc[top_n_ids].join(info, on="id")
 
-    pk, mrrk, ndcgk = getMetrics(topIdsFiles[file_id].loc[[id_song]], top)
+    pk, mrrk, ndcgk = getMetrics(topIdsFiles[file_id].loc[[id_song]], top, genres)
     print("MAP@"+str(top), pk, "MRR@"+str(top), mrrk, "Mean NDCG@"+str(top), ndcgk, "\n\n")
 
     return { "song": query_song , "top": topVal, "metrics" : { "MAP" : pk, "MRR" : mrrk, "NDCG" : ndcgk }  }
+
 
 @app.get("/metrics/")
 async def getEvaluationMetrics(vectorData: DataVector, simFunction: SimilarityFunction, k:int):
