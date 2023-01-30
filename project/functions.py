@@ -23,7 +23,7 @@ def get_cosine_similarity(arr_a, arr_b):
 def get_jaccard_similarity(arr_a: np.array, arr_b: np.array):
     norms_a = np.linalg.norm(arr_a, axis=-1)[:, np.newaxis]
     norms_b = np.linalg.norm(arr_b, axis=-1)[:, np.newaxis]
-    divisor = norms_a + norms_b.T
+    divisor = norms_a**2 + norms_b.T**2
     dotp = arr_a @ arr_b.T
     r = dotp / (divisor-dotp)
     return r
@@ -54,9 +54,9 @@ def compute_topIds(results: np.array, idx_values: np.array, top: int=100):
 
 # Check if any genre of the song one is in the genres of song two, if yes returns True
 def isResultRelevant(songOneGenres, songTwoGenres):
-    return any(item in get_genres(songOneGenres) for item in get_genres(songTwoGenres))
+    return any(item in songOneGenres for item in songTwoGenres)
 
-def meanAveragePrecision(dfTopIds, topNumber, genres):
+def meanAveragePrecision(dfTopIds, topNumber, genres, relevantNumbers):
     
     AP_ = []
     for queryId in tqdm(dfTopIds.index.values):
@@ -65,7 +65,15 @@ def meanAveragePrecision(dfTopIds, topNumber, genres):
         querySongGenres = genres.loc[[queryId], 'genre'].values[0]
         topSongsGenres = genres.loc[topIds, 'genre'].values
         relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
+
+        # Which one is correct? Relevants in top k, or in all the query i.e the 68841
+
+        # Total of relevant for the query
+#         REL =relevantNumbers.loc[queryId].values
+
+        # Relevants in the top k
         REL = np.sum(relevant_results)
+        
         if REL == 0: # Case when there is no relevant result in the top@K
             AP = 0
         else:
@@ -90,18 +98,22 @@ def meanReciprocalRank(dfTopIds, topNumber, genres):
 
     return np.mean(RR)
 
-
-def ndcgMean(dfTopIds, topNumber, genres):
+def ndcgMean(dfTopIds, topNumber, genres, relevantNumbers):
     ndcg = []
 
     for queryId in tqdm(dfTopIds.index.values):
-        
+        total_relevant = relevantNumbers.loc[queryId].values
         topIds = dfTopIds.loc[queryId].values[:topNumber]
+
         querySongGenres = genres.loc[[queryId], 'genre'].values[0]
-        topSongsGenres = genres.loc[topIds, 'genre'].values
-        
+        topSongsGenres  = genres.loc[topIds, 'genre'].values
         relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
-        sorted_results = sorted(relevant_results, reverse=True) 
+        
+        if(total_relevant >= topNumber):
+            sorted_results = np.ones(topNumber)
+        else:
+            sorted_results = np.concatenate((np.ones(total_relevant), np.zeros(topNumber-total_relevant)))
+
         dcg =[ res/np.log2(i+1) if i+1 > 1 else float(res) for i,res in enumerate(relevant_results)]
         idcg =[ res/np.log2(i+1) if i+1 > 1 else float(res) for i,res in enumerate(sorted_results)]
         
@@ -111,7 +123,7 @@ def ndcgMean(dfTopIds, topNumber, genres):
             ndcg.append(np.sum(dcg) / np.sum(idcg))
     return (ndcg, np.mean(ndcg))
 
-def getMetrics(dfTopIds, topNumber, genres):
+def getMetrics(dfTopIds, topNumber, genres, relevantNumbers):
 
     RR = []
     AP_ = []
@@ -119,12 +131,16 @@ def getMetrics(dfTopIds, topNumber, genres):
 
     for queryId in tqdm(dfTopIds.index.values):
         
+        total_relevant = relevantNumbers.loc[queryId].values
         topIds = dfTopIds.loc[queryId].values[:topNumber]
         querySongGenres = genres.loc[[queryId], 'genre'].values[0]
-        topSongsGenres = genres.loc[topIds, 'genre'].values
-        
+        topSongsGenres  = genres.loc[topIds, 'genre'].values
         relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
-        sorted_results = sorted(relevant_results, reverse=True)
+        
+        if(total_relevant >= topNumber):
+            sorted_results = np.ones(topNumber)
+        else:
+            sorted_results = np.concatenate((np.ones(total_relevant), np.zeros(topNumber-total_relevant)))
 
         # MAP
         REL = np.sum(relevant_results)
@@ -178,27 +194,23 @@ def compute_in_batches_top(arr_a: np.array, arr_b: np.array, simfunction, idx_va
     return np.concatenate(top_values, axis=0)
 
 
-def generate_MAP_MRR_NDCG_file(file, datasets, genres):
+def generate_MAP_MRR_NDCG_file(file, datasets, genres, relevantNumbers):
     if exists(file ):
         metrics_datasets = pd.read_csv(file, index_col=0)
     else:
-
-        i = 0
+      
         MAP_100 = np.zeros((len(datasets.items())))
         MRR_100 = np.zeros((len(datasets.items())))
         MeanNDCG_100 = np.zeros((len(datasets.items())))
 
-        for value in datasets.values():
-            MAP_100[i], MRR_100[i], MeanNDCG_100[i] = getMetrics(value, 100, genres)
-            i += 1  
-
-        i = 0
         MAP_10 = np.zeros((len(datasets.items())))
         MRR_10 = np.zeros((len(datasets.items())))
         MeanNDCG_10 = np.zeros((len(datasets.items())))
 
+        i = 0
         for value in datasets.values():
-            MAP_10[i], MRR_10[i], MeanNDCG_10[i] = getMetrics(value, 10, genres)
+            MAP_100[i], MRR_100[i], MeanNDCG_100[i] = getMetrics(value, 100, genres, relevantNumbers)
+            MAP_10[i], MRR_10[i], MeanNDCG_10[i] = getMetrics(value, 10, genres, relevantNumbers)
             i += 1 
 
         metrics_datasets =pd.DataFrame(
@@ -210,11 +222,10 @@ def generate_MAP_MRR_NDCG_file(file, datasets, genres):
     return metrics_datasets
 
 # The same as generate_MAP_MRR_NDCG_file, but with all the metrics
-def get_metrics_file(file, datasets, genres,spotifyData):
+def get_metrics_file(file, datasets, genres,relevantNumbers,spotifyData):
     if exists(file ):
         metrics_datasets = pd.read_csv(file, index_col=0)
     else:
-
         
         MAP_100 = np.zeros((len(datasets.items())))
         MRR_100 = np.zeros((len(datasets.items())))
@@ -229,8 +240,8 @@ def get_metrics_file(file, datasets, genres,spotifyData):
     
         i = 0
         for value in datasets.values():
-            MAP_100[i], MRR_100[i], MeanNDCG_100[i] = getMetrics(value, 100, genres)
-            MAP_10[i], MRR_10[i], MeanNDCG_10[i] = getMetrics(value, 10, genres)
+            MAP_100[i], MRR_100[i], MeanNDCG_100[i] = getMetrics(value, 100, genres, relevantNumbers)
+            MAP_10[i], MRR_10[i], MeanNDCG_10[i] = getMetrics(value, 10, genres, relevantNumbers)
             bias_values[i] = np.median(get_popularity_bias_metric(value, spotifyData, np.mean))
             hubness_10[i] = metric_hubness(value, 10)
             hubness_100[i] = metric_hubness(value, 100)
@@ -244,7 +255,7 @@ def get_metrics_file(file, datasets, genres,spotifyData):
         
     return metrics_datasets
 
-def Precision(dfTopIds, topNumber, returnMeanOfValues, genres):
+def Precision(dfTopIds, topNumber, returnMeanOfValues, genres, relevantNumbers):
     
     precision = np.zeros((dfTopIds.shape[0], topNumber))
     recall = np.zeros((dfTopIds.shape[0], topNumber))
@@ -254,21 +265,22 @@ def Precision(dfTopIds, topNumber, returnMeanOfValues, genres):
         
         topIds = dfTopIds.loc[queryId].values[:topNumber]
         querySongGenres = genres.loc[[queryId], 'genre'].values[0]
-        topSongsGenres = genres.loc[topIds, 'genre'].values
+        topSongsGenres  = genres.loc[topIds, 'genre'].values
         relevant_results = [isResultRelevant(querySongGenres, songGenre) for songGenre in topSongsGenres]
-        REL = np.sum(relevant_results)
+        
+        #Relevants in all set
+        REL =relevantNumbers.loc[queryId].values
 
         if REL != 0: # Case when there is no relevant result in the top@K
             precision[idx] = np.divide(np.cumsum(relevant_results,axis=0), np.arange(1,topNumber+1))
             recall[idx] = np.divide(np.cumsum(relevant_results,axis=0), REL)
             precision_max[idx] = [ np.max(precision[idx,i:]) for i,val in enumerate(precision[idx])]
 
-#     return precision, recall, precision_max
     if returnMeanOfValues:
         return np.mean(precision, axis=0), np.mean(recall, axis=0), np.mean(precision_max, axis=0)
     return precision, recall, precision_max
 
-def get_preicison_data(f_p, f_r, f_p_max, datasets, genres):
+def get_precision_data(f_p, f_r, f_p_max, datasets, genres, relevant_by_id):
     if (exists(f_p) and  exists(f_r) and exists(f_p_max)):
         P = pd.read_csv(f_p, index_col=0).to_numpy()
         R = pd.read_csv(f_r, index_col=0).to_numpy()
@@ -279,7 +291,7 @@ def get_preicison_data(f_p, f_r, f_p_max, datasets, genres):
         R = np.zeros((len(datasets.items()), 100))
         P_max = np.zeros((len(datasets.items()), 100))
         for value in datasets.values():
-            P[i], R[i], P_max[i] = Precision(value, 100, True, genres)
+            P[i], R[i], P_max[i] = Precision(value, 100, True, genres, relevant_by_id)
             i += 1  
 
         pd.DataFrame(P, index=datasets.keys()).to_csv(f_p)

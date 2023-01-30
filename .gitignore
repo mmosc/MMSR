@@ -136,3 +136,13 @@ dmypy.json
 .idea
 
 *.zip
+
+!relation_original_new_ids.csv
+!relevant_results_by_newid.csv
+!project/data/cosine_recall_*.csv
+!project/data/cosine_precision_*.csv
+!project/data/cosine_max_precision_*.csv
+!project/data/jaccard_recall_*.csv
+!project/data/jaccard_precision_*.csv
+!project/data/jaccard_max_precision_*.csv
+!project/data/df_allmetrics_*.csv
