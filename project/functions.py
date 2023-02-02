@@ -321,3 +321,58 @@ def get_popularity_bias_metric(topIdsDataset, popularityDataset,  metric):
         bias_metric.append(popularity_bias)
         
     return np.array(bias_metric)
+
+# Functions for correlation metrics
+
+def intersection(lst1, lst2):
+    # Use of hybrid method
+    temp = set(lst2)
+    lst3 = [value for value in lst1 if value in temp]
+    return lst3
+
+def tauKendall(r1,r2, K):
+    possible_pairs_r1 = [(a, b) for idx, a in enumerate(r1) for b in r1[idx + 1:]]
+    possible_pairs_r2 = [(a, b) for idx, a in enumerate(r2) for b in r2[idx + 1:]]
+    concordant_pairs = intersection(possible_pairs_r1, possible_pairs_r2)
+    # 2 times size of concordant pairs because they are repeated in the two rankings
+    delta = (K*(K-1)) - (len(concordant_pairs)*2)
+    tau = 1 - ((2*delta) / (K*(K-1)))
+    return tau
+
+def getCorrelationTau(file_correlations, datasets):
+    if exists(file_correlations):
+        return pd.read_csv(file_correlations, index_col=0)
+    else:    
+        correlations_tau = pd.DataFrame(index=datasets.keys(), columns=datasets.keys())
+        queries = datasets[list(datasets.keys())[0]].index.values
+        df_list = list(datasets.keys())
+        df_combinations_ = [(a, b) for idx, a in enumerate(df_list) for b in df_list[idx + 1:]]
+        df_combinations =list(zip(df_list, df_list))
+        df_combinations.extend(df_combinations_)
+        corr_all_values_tau  = np.zeros((len(df_combinations), queries.shape[0]))
+        print("Total iterations:", len(df_combinations))
+
+        for i, (df1, df2) in tqdm(enumerate(df_combinations)):
+            for idx,query in enumerate(queries):
+                corr_all_values_tau[i, idx] = tauKendall(datasets[df1].loc[query].values, datasets[df2].loc[query].values, 100)
+            correlations_tau.loc[df1, df2] = np.mean(corr_all_values_tau[i])
+
+        correlations_tau.to_csv(file_correlations)
+        return correlations_tau
+
+
+# Helper function to transfrom between standard ids and new ids and viceversa
+def from_standard_ids_to_new(df, relationIds):
+    id_to_key = dict(zip(relationIds.index.values, relationIds['newId'].values))
+    new_df = df.apply(lambda s : [id_to_key[x] for x in s] , raw=True , axis=1)
+    new_df = new_df.set_index(np.asarray([id_to_key[i] for i in df.index.values]))
+    new_df.index.astype(np.int32, copy=False)
+    new_df.index.name='index'
+    return new_df
+
+def from_new_ids_to_standard(df, relationIds):
+    id_to_key = dict(zip(relationIds['newId'].values, relationIds.index.values))
+    new_df =  df.apply(lambda s : [id_to_key[x] for x in s] , raw=True , axis=1)
+    new_df = new_df.set_index(np.asarray([id_to_key[i] for i in df.index.values]))
+    new_df.index.name='index'
+    return new_df

@@ -146,3 +146,5 @@ dmypy.json
 !project/data/jaccard_precision_*.csv
 !project/data/jaccard_max_precision_*.csv
 !project/data/df_allmetrics_*.csv
+!project/data/correlations_*.csv
+!project/data/correlation_*.csv
