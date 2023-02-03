@@ -1,4 +1,5 @@
-,baseline,latefusion_weighted_sum,latefusion_bordacount
-baseline,1.0,-0.9999979574595328,-0.9999978750515603
-latefusion_weighted_sum,,1.0,-0.9940078808510213
-latefusion_bordacount,,,1.0
+,baseline,latefusion_weighted_sum_all,latefusion_weighted_sum_selected,latefusion_bordacount
+baseline,1.0,-0.9999979574595328,-0.9999978044161548,-0.9999978750515603
+latefusion_weighted_sum_all,,1.0,-0.7507857526621821,-0.9940078808510213
+latefusion_weighted_sum_selected,,,1.0,-0.9859839754753873
+latefusion_bordacount,,,,1.0
