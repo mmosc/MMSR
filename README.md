@@ -3,15 +3,27 @@
 ## Report
 Link to report: https://www.overleaf.com/read/hjvjcvffndyf
 
+## WebApplication
+App: https://mmsr-app.vercel.app
+
+Code: https://github.com/Eduardo0697/mmsr_app
+
+## Implementation of API with limited resources in server
+Code: https://github.com/Eduardo0697/api-mmsr
+
+
 ## Files included
 | File | Description |
 |--- | --- |
 | `./project/main.py` | API developed for the implementation of the project|
 | `./project/files.py`| Contains the variables that have the reference to the datasets files. Also If you want to run the project from zero, to generate the top ids while doing queries on the API change the first variable to `USE_COMPLETE_DATASETS = False` |
 | `./project/functions.py`| Contains the developed functions to solve the task |
-| `./project/ImplementationTask2.ipynb` | **Contains the similarity functions used**, and the implementation of the computation of the top 100 ids for each of the features.|
-| `./project/EvaluationMetrics-.ipynb` | Contains the implementation of the functions to calculate the **MAP, MRR, NDCG and Kendall Tau correlation**. And the generation of the **Precision/Recall plots.** |
+| `./project/ComputationTopIds_Individual_and_Fusioned.ipynb` |  Implementation of the computation of the top 100 ids for each of the **individual features**, **early fusion of selected features without PCA**, and implementation of **Borda count for late fusion**.|
+| `./project/EvaluationMetrics-.ipynb` | Contains the implementation of the functions to calculate the **MAP, MRR, NDCG and Kendall Tau correlation, Popularity Bias, Hubness**. And the generation of the **Precision/Recall plots.** |
 | `./project/StatisticalDataAnalysis.ipynb` | Contains the **statistical data analysis** |
+|`/project/LateFusion.ipynb`| Implementation of LateFusion, different methods in all the features|
+|`./project/LateFusion-TestSelectedFeatures.ipynb`| Contains the late fusion weighted sum with selected features|
+|`./project/EarlyFusion.ipynb`| Contains the implementation of early fusion of the features with PCA |
 
 
 ## Todo
