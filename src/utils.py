@@ -1,6 +1,8 @@
-from typing import Callable
+import re
+from typing import Callable, List
 
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 
@@ -76,3 +78,47 @@ def compute_top(
         top_values[i, :] = np.argsort(results * -1, axis=1)[:, :top]
 
     return top_values
+
+
+def get_genres(field: str) -> List[str]:
+    """
+    Parses the genre list string as provided in the csv
+    :param field: The genres as a joined string
+    :return: The genres as a list
+    """
+    return re.findall(r"\'(.*?)\'", field)
+
+
+def get_mapping(df: pd.DataFrame):
+    """
+    Since string indices are unhandy, a mapping to integer indices are preferred
+    :param df: A dataframe containing all items in the index
+    :return: an id-to-key and a key-to-id mapping
+    """
+    id_to_key = sorted(df.index.values)
+    key_to_id = dict(zip(id_to_key, list(range(len(df.index.values)))))
+    return id_to_key, key_to_id
+
+
+def get_genre_matrix(genres: pd.DataFrame) -> pd.DataFrame:
+    """Returns the song-genre matrix
+    :param genres: The genre dataframe
+    :return: A boolean dataframe of shape(samples, genres)
+    """
+
+    # This is to get a list of the available genres and also its frequency
+    all_genres = set()
+    for song in genres["genre"]:
+        all_genres = all_genres.union(get_genres(song))
+
+    genre_id_to_key = sorted(list(all_genres))
+    genre_key_to_id = dict(zip(genre_id_to_key, list(range(len(all_genres)))))
+
+    id_to_key, key_to_id = get_mapping(genres)
+    genre_matrix = np.zeros((len(genres), len(all_genres)), dtype=np.int32)
+
+    for genre_id in range(len(genres)):
+        for g in get_genres(genres["genre"].loc[id_to_key[genre_id]]):
+            genre_matrix[genre_id, genre_key_to_id[g]] = 1
+
+    return pd.DataFrame(genre_matrix, columns=genre_id_to_key, index=id_to_key)
