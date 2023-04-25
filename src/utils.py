@@ -103,7 +103,7 @@ def get_mapping(df: pd.DataFrame):
 def get_genre_matrix(genres: pd.DataFrame) -> pd.DataFrame:
     """Returns the song-genre matrix
     :param genres: The genre dataframe
-    :return: A boolean dataframe of shape(samples, genres)
+    :return: A boolean dataframe of shape(samples, genres), where samples and genres are sorted
     """
 
     # This is to get a list of the available genres and also its frequency
@@ -117,8 +117,8 @@ def get_genre_matrix(genres: pd.DataFrame) -> pd.DataFrame:
     id_to_key, key_to_id = get_mapping(genres)
     genre_matrix = np.zeros((len(genres), len(all_genres)), dtype=np.int32)
 
-    for genre_id in range(len(genres)):
-        for g in get_genres(genres["genre"].loc[id_to_key[genre_id]]):
-            genre_matrix[genre_id, genre_key_to_id[g]] = 1
+    for sample_index, sample_id in enumerate(id_to_key):
+        for g in get_genres(genres["genre"].loc[sample_id]):
+            genre_matrix[sample_index, genre_key_to_id[g]] = 1
 
     return pd.DataFrame(genre_matrix, columns=genre_id_to_key, index=id_to_key)
