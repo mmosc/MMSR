@@ -5,7 +5,7 @@ import numpy as np
 from datatable import dt
 
 from src.similarity_functions import get_jaccard_similarity, get_overlap_similarity
-from src.utils import get_genre_matrix, compute_in_batches_distance
+from src.utils import get_genre_matrix, compute_in_batches_similarity
 
 
 def get_genre_df():
@@ -24,7 +24,7 @@ def get_relevance(
         genre_matrix = get_genre_matrix(get_genre_df())
 
         # Get the similarity
-        data = compute_in_batches_distance(
+        data = compute_in_batches_similarity(
             genre_matrix.to_numpy(dtype=np.float32), sim_function, 100
         )
 

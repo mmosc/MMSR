@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def compute_in_batches_distance(
+def compute_in_batches_similarity(
     arr: np.array,
     sim_function: Callable[[np.array, np.array], np.array],
     batches: int = 1,
