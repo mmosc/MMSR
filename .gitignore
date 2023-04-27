@@ -148,3 +148,4 @@ dmypy.json
 !project/data/df_allmetrics_*.csv
 !project/data/correlations_*.csv
 !project/data/correlation_*.csv
+/src/cache/
