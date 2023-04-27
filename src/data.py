@@ -4,8 +4,9 @@ from typing import Callable
 import numpy as np
 from datatable import dt
 
-from src.similarity_functions import get_jaccard_similarity, get_overlap_similarity
-from src.utils import get_genre_matrix, compute_in_batches_similarity
+from src.utils import get_genre_matrix, compute_similarity, compute_top_ids_directly
+
+DATA_SIZE = -1
 
 
 def get_genre_df():
@@ -13,35 +14,37 @@ def get_genre_df():
     return dt.fread(path).to_pandas().set_index("id")
 
 
-def get_relevance(
-        key: str, sim_function: Callable[[np.array, np.array], np.array]
+USE_CACHE = True
+
+if USE_CACHE:
+    os.makedirs("cache", exist_ok=True)
+
+
+def get_cached(
+    key: str,
+    feature: np.array,
+    processor: Callable,
+    sim_function: Callable[[np.array, np.array], np.array],
 ) -> np.array:
+    """
+    Processes data and caches it on disk
+    :param key: Unique id for that data combination
+    :param feature: The feature matrix (samples, features)
+    :param processor: One of the compute functions (similarity, or top ids)
+    :param sim_function: The similarity function
+    :return:
+    """
     path = "cache/" + key + ".npy"
     if os.path.exists(path):
         return np.load(path)
     else:
-        # Get the genres encoded as a boolean matrix
-        genre_matrix = get_genre_matrix(get_genre_df())
-
         # Get the similarity
-        data = compute_in_batches_similarity(
-            genre_matrix.to_numpy(dtype=np.float32), sim_function, 100
-        )
+        data = processor(feature, sim_function, min(len(feature), 100))
 
         # Cache and return
-        np.save(path, data)
+        if USE_CACHE:
+            np.save(path, data)
         return data
-
-
-os.makedirs("cache", exist_ok=True)
-
-
-def get_jaccard_relevance():
-    return get_relevance("jaccard_genre_relevance", get_jaccard_similarity)
-
-
-def get_simple_relevance():
-    return get_relevance("simple_genre_relevance", get_overlap_similarity)
 
 
 # noinspection SpellCheckingInspection
@@ -65,9 +68,9 @@ features = {
 
 
 def get_features(feature: str):
-    assert feature in features
-
-    if feature == "blf_logfluc":
+    if feature == "genre_matrix":
+        data = get_genre_matrix(get_genre_df())
+    elif feature == "blf_logfluc":
         data = dt.fread(features[feature])
 
         # This is done because in the csv it has an extra column name,
@@ -83,6 +86,8 @@ def get_features(feature: str):
         data.set_index("id", inplace=True)
         data = data.astype(np.float32)
     else:
+        assert feature in features
+
         data = (
             dt.fread(features[feature], header=True)
             .to_pandas()
@@ -93,4 +98,42 @@ def get_features(feature: str):
     # Reindex to make sure the underlying numpy array also conforms to the universal order
     data = data.reindex(sorted(data.index.values), copy=False)
 
+    data = data.iloc[:DATA_SIZE]
+
     return data
+
+
+def get_similarity_for(
+    feature: str,
+    sim_function: Callable[[np.array, np.array], np.array],
+) -> np.array:
+    """
+    Cached helper to retrieve the top ids for a given feature name and similarity function
+    :param feature:
+    :param sim_function:
+    :return:
+    """
+    return get_cached(
+        feature + "_" + sim_function.__name__ + "_" + str(DATA_SIZE) + "_similarity",
+        get_features(feature).to_numpy(),
+        compute_similarity,
+        sim_function,
+    )
+
+
+def get_top_ids_for(
+    feature: str,
+    sim_function: Callable[[np.array, np.array], np.array],
+) -> np.array:
+    """
+    Cached helper to retrieve the top ids for a given feature name and similarity function
+    :param feature:
+    :param sim_function:
+    :return:
+    """
+    return get_cached(
+        feature + "_" + sim_function.__name__ + "_" + str(DATA_SIZE) + "_top_ids",
+        get_features(feature).to_numpy(),
+        compute_top_ids_directly,
+        sim_function,
+    )
