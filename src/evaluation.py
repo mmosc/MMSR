@@ -11,7 +11,7 @@ def is_result_relevant(songOneGenres, songTwoGenres):
     return any(item in get_genres(songOneGenres) for item in get_genres(songTwoGenres))
 
 
-def evaluate(
+def evaluate_similarity(
     y_true: np.array,
     y_pred: np.array,
     evaluation_function: Callable[[np.array, np.array], np.array],
@@ -28,9 +28,13 @@ def evaluate(
     y_true_splits = np.array_split(y_true, batches, axis=0)
     y_pred_splits = np.array_split(y_pred, batches, axis=0)
     score = 0
-    for (y_true_split, y_pred_split) in tqdm(list(zip(y_true_splits, y_pred_splits))):
-        score += evaluation_function(y_true_split, y_pred_split) * len(y_true_split)
-    return score / len(y_true)
+    samples = 0
+    with tqdm(list(zip(y_true_splits, y_pred_splits))) as t:
+        for (y_true_split, y_pred_split) in t:
+            score += evaluation_function(y_true_split, y_pred_split) * len(y_true_split)
+            samples += len(y_true_split)
+            t.set_description(f"Score: {score / samples}")
+    return score / samples
 
 
 def get_metrics(top_id_df, top_k, genres):

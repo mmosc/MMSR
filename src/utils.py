@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def compute_in_batches_similarity(
+def compute_similarity(
     features: np.array,
     sim_function: Callable[[np.array, np.array], np.array],
     batches: int = 1,
@@ -26,7 +26,7 @@ def compute_in_batches_similarity(
     return r
 
 
-def compute_in_batches_top_ids(similarity: np.array, top: int = -1, batches: int = 1):
+def compute_top_ids(similarity: np.array, top: int = -1, batches: int = 1):
     """
     :param similarity: a similarity matrix
     :param top: how many ids should get retrieved
@@ -44,7 +44,7 @@ def compute_in_batches_top_ids(similarity: np.array, top: int = -1, batches: int
     return ids
 
 
-def compute_top_ids(
+def compute_top_ids_directly(
     features: np.array,
     sim_function: Callable[[np.array, np.array], np.array],
     batches: int = 1,
@@ -115,10 +115,10 @@ def get_genre_matrix(genres: pd.DataFrame) -> pd.DataFrame:
     genre_key_to_id = dict(zip(genre_id_to_key, list(range(len(all_genres)))))
 
     id_to_key, key_to_id = get_mapping(genres)
-    genre_matrix = np.zeros((len(genres), len(all_genres)), dtype=np.int32)
+    genre_matrix = np.zeros((len(genres), len(all_genres)), dtype=np.float32)
 
     for sample_index, sample_id in enumerate(id_to_key):
         for g in get_genres(genres["genre"].loc[sample_id]):
-            genre_matrix[sample_index, genre_key_to_id[g]] = 1
+            genre_matrix[sample_index, genre_key_to_id[g]] = 1.0
 
     return pd.DataFrame(genre_matrix, columns=genre_id_to_key, index=id_to_key)
