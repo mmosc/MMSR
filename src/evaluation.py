@@ -1,27 +1,21 @@
 from typing import Callable
 
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
-
-from src.utils import get_genres
-
-
-def is_result_relevant(songOneGenres, songTwoGenres):
-    """Check if any genre of the song one is in the genres of song two, if yes returns True"""
-    return any(item in get_genres(songOneGenres) for item in get_genres(songTwoGenres))
 
 
 def evaluate_similarity(
-    y_true: np.array,
-    y_pred: np.array,
-    evaluation_function: Callable[[np.array, np.array], np.array],
+    y_true: pd.DataFrame,
+    y_pred: pd.DataFrame,
+    evaluation_function: Callable[[pd.DataFrame, pd.DataFrame], float],
     batches: int = 100,
 ) -> float:
     """
     Evaluates the predicted similarities on the target relevance
     :param y_true: Relevance matrix
     :param y_pred: Predicted similarity matrix
-    :param evaluation_function: Evaluation function, e.g. sklearn metrics
+    :param evaluation_function: Evaluation function, e.g. sklearn metrics like NDCG score
     :param batches: Batches to process evaluation function
     :return: A float from 0 to 1 representing the score
     """
@@ -37,38 +31,62 @@ def evaluate_similarity(
     return score / samples
 
 
-def get_metrics(top_id_df, top_k, genres):
+def get_metrics(relevance: pd.DataFrame, top_ids: pd.DataFrame, k: int = -1) -> dict:
+    """
+    :param relevance: Relevance matrix
+    :param top_ids: The predicted top ids
+    :param k: Optionally the k to evaluate on
+    :return: A dictionary containing all metrics
+    """
     RR = []
     AP_ = []
+    ndcg = []
 
-    for queryId in tqdm(top_id_df.index.values):
-        topIds = top_id_df.loc[queryId].values[:top_k]
-        querySongGenres = genres.loc[[queryId], "genre"].values[0]
-        topSongsGenres = genres.loc[topIds, "genre"].values
-        relevant_results = [
-            is_result_relevant(querySongGenres, songGenre)
-            for songGenre in topSongsGenres
-        ]
+    # todo on float relevance matrices RR and AP fails
+
+    for index in tqdm(range(len(top_ids))):
+        top_k_ids = top_ids.values[index, :k]
+
+        # Relevance of fetched results
+        result_relevance = relevance.values[index, top_k_ids]
+
+        # Construct the optimal order and (sorted) optimal relevance
+        optimal_top_ids = np.argsort(relevance.values[index, :] * -1)[:k]
+        sorted_results = relevance.values[index, optimal_top_ids]
 
         # MAP
-        REL = np.sum(relevant_results)
+        REL = np.sum(result_relevance)
         if REL == 0:  # Case when there is no relevant result in the top@K
             AP = 0
         else:
             AP = (1 / REL) * np.sum(
                 np.multiply(
-                    relevant_results,
-                    np.divide(
-                        np.cumsum(relevant_results, axis=0), np.arange(1, top_k + 1)
-                    ),
+                    result_relevance,
+                    np.divide(np.cumsum(result_relevance, axis=0), np.arange(1, k + 1)),
                 )
             )
         AP_.append(AP)
 
         # MRR
-        if True in relevant_results:
-            min_idx_rel = relevant_results.index(True) + 1
+        if np.count_nonzero(result_relevance) > 0:
+            min_idx_rel = np.argmax(result_relevance > 0) + 1
             RR.append(1 / min_idx_rel)
         else:  # Case when there is no relevant result in the top@K
             RR.append(0)
-    return np.mean(AP_), np.mean(RR)
+
+        # NDCG
+        dcg = np.sum(
+            [
+                res / np.log2(i + 1) if i + 1 > 1 else float(res)
+                for i, res in enumerate(result_relevance)
+            ]
+        )
+        idcg = np.sum(
+            [
+                res / np.log2(i + 1) if i + 1 > 1 else float(res)
+                for i, res in enumerate(sorted_results)
+            ]
+        )
+        ndcg.append(0 if idcg == 0 else dcg / idcg)
+
+    return {"MAP": np.mean(AP_), "MRR": np.mean(RR), "NDCG": np.mean(ndcg)}
