@@ -2,6 +2,7 @@ import os
 from typing import Callable
 
 import numpy as np
+import pandas as pd
 from datatable import dt
 
 from src.utils import get_genre_matrix, compute_similarity, compute_top_ids_directly
@@ -67,7 +68,7 @@ features = {
 }
 
 
-def get_features(feature: str):
+def get_features(feature: str) -> pd.DataFrame:
     if feature == "genre_matrix":
         data = get_genre_matrix(get_genre_df())
     elif feature == "blf_logfluc":
@@ -113,12 +114,14 @@ def get_similarity_for(
     :param sim_function:
     :return:
     """
-    return get_cached(
+    df = get_features(feature)
+    data = get_cached(
         feature + "_" + sim_function.__name__ + "_" + str(DATA_SIZE) + "_similarity",
-        get_features(feature).to_numpy(),
+        df.to_numpy(),
         compute_similarity,
         sim_function,
     )
+    return pd.DataFrame(data, index=df.index, columns=df.index.values)
 
 
 def get_top_ids_for(
@@ -131,9 +134,11 @@ def get_top_ids_for(
     :param sim_function:
     :return:
     """
-    return get_cached(
+    df = get_features(feature)
+    data = get_cached(
         feature + "_" + sim_function.__name__ + "_" + str(DATA_SIZE) + "_top_ids",
-        get_features(feature).to_numpy(),
+        df.to_numpy(),
         compute_top_ids_directly,
         sim_function,
     )
+    return pd.DataFrame(data=data, index=df.index, columns=df.index.values)

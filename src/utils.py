@@ -7,32 +7,38 @@ from tqdm import tqdm
 
 
 def compute_similarity(
-    features: np.array,
+    features_df: pd.DataFrame,
     sim_function: Callable[[np.array, np.array], np.array],
     batches: int = 1,
-):
+) -> pd.DataFrame:
     """
-    :param features: full Data array
+    :param features_df: full Data array
     :param sim_function: similarity function, receiving two 2 dimensional data matrices
     :param batches: split arr into chunks for less RAM usage
     :return: the full similarity matrix
     """
+    features = features_df.to_numpy()
     splits = np.array_split(features, batches, axis=0)
-    r = np.zeros((len(features),) * 2, dtype=np.float32)
+    similarity = np.zeros((len(features),) * 2, dtype=np.float32)
     y = 0
     for b in tqdm(splits):
-        r[:, y : y + b.shape[0]] = sim_function(features, b)
+        similarity[:, y : y + b.shape[0]] = sim_function(features, b)
         y += b.shape[0]
-    return r
+    return pd.DataFrame(
+        data=similarity, index=features_df.index, columns=features_df.index.values
+    )
 
 
-def compute_top_ids(similarity: np.array, top: int = -1, batches: int = 1):
+def compute_top_ids(
+    similarity_df: pd.DataFrame, top: int = -1, batches: int = 1
+) -> pd.DataFrame:
     """
-    :param similarity: a similarity matrix
+    :param similarity_df: a similarity matrix
     :param top: how many ids should get retrieved
     :param batches: split arr into chunks for less RAM usage
     :return: the ranking matrix
     """
+    similarity = similarity_df.to_numpy()
     if top < 0:
         top = len(similarity)
     splits = np.array_split(similarity, batches, axis=0)
@@ -41,23 +47,27 @@ def compute_top_ids(similarity: np.array, top: int = -1, batches: int = 1):
     for b in tqdm(splits):
         ids[y : y + b.shape[0], :] = np.argsort(b * -1, axis=1)[:, :top]
         y += b.shape[0]
-    return ids
+    return pd.DataFrame(
+        data=ids, index=similarity_df.index, columns=similarity_df.index.values
+    )
 
 
 def compute_top_ids_directly(
-    features: np.array,
+    features_df: pd.DataFrame,
     sim_function: Callable[[np.array, np.array], np.array],
     batches: int = 1,
     top: int = -1,
 ) -> np.array:
     """
     Calculates the final ranking matrix, in batches, with minimum memory requirements
-    :param features: Input features of shape (samples, features)
+    :param features_df: Input features of shape (samples, features)
     :param sim_function: Similarity function returning similarity scores for two matrices. The sample count may differ based on batching.
     :param batches: Batching reduces the intermediate memory requirements and improves process response times
     :param top: How many results to store, default are all
     :return: The ranking matrix
     """
+    features = features_df.to_numpy()
+
     splits = np.array_split(features, batches, axis=0)
     splits_idx = np.array_split(np.arange(features.shape[0]), batches, axis=0)
 
@@ -77,7 +87,9 @@ def compute_top_ids_directly(
         # Get the document indices instead of the distances
         top_values[i, :] = np.argsort(results * -1, axis=1)[:, :top]
 
-    return top_values
+    return pd.DataFrame(
+        data=top_values, index=features_df.index, columns=features_df.index.values
+    )
 
 
 def get_genres(field: str) -> List[str]:
