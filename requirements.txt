@@ -4,3 +4,5 @@ datatable~=1.0.0
 tqdm~=4.64.1
 tables~=3.8.0
 fastapi~=0.86.0
+scikit-learn~=1.2.1
+scipy~=1.9.3
