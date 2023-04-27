@@ -42,6 +42,9 @@ def get_metrics(relevance: pd.DataFrame, top_ids: pd.DataFrame, k: int = -1) -> 
     AP_ = []
     ndcg = []
 
+    if k < 0:
+        k = relevance.shape[1]
+
     # todo on float relevance matrices RR and AP fails
 
     for index in tqdm(range(len(top_ids))):
