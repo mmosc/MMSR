@@ -31,7 +31,7 @@ def evaluate_similarity(
     return score / samples
 
 
-def get_metrics(relevance: pd.DataFrame, top_ids: pd.DataFrame, k: int = -1) -> dict:
+def get_metrics(top_ids: pd.DataFrame, relevance: pd.DataFrame, k: int = -1) -> dict:
     """
     :param relevance: Relevance matrix
     :param top_ids: The predicted top ids
@@ -93,3 +93,34 @@ def get_metrics(relevance: pd.DataFrame, top_ids: pd.DataFrame, k: int = -1) -> 
         ndcg.append(0 if idcg == 0 else dcg / idcg)
 
     return {"MAP": np.mean(AP_), "MRR": np.mean(RR), "NDCG": np.mean(ndcg)}
+
+
+def intersection(lst1, lst2):
+    # Use of hybrid method
+    temp = set(lst2)
+    lst3 = [value for value in lst1 if value in temp]
+    return lst3
+
+
+def custom_tau_kendall(r1, r2, K):
+    possible_pairs_r1 = [(a, b) for idx, a in enumerate(r1) for b in r1[idx + 1 :]]
+    possible_pairs_r2 = [(a, b) for idx, a in enumerate(r2) for b in r2[idx + 1 :]]
+    concordant_pairs = intersection(possible_pairs_r1, possible_pairs_r2)
+    # 2 times size of concordant pairs because they are repeated in the two rankings
+    delta = (K * (K - 1)) - (len(concordant_pairs) * 2)
+    tau = 1 - ((2 * delta) / (K * (K - 1)))
+    return tau
+
+
+def evaluate_ranking(
+    y_true: pd.DataFrame, y_predicted: pd.DataFrame, correlation_measure: Callable
+) -> float:
+    score = 0
+    samples = 0
+    with tqdm(y_true.index.values) as t:
+        for i in t:
+            c = correlation_measure(y_true.loc[i], y_predicted.loc[i])
+            score += c
+            samples += 1
+            t.set_description(f"Correlation: {score / samples}")
+    return score / samples

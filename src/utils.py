@@ -9,7 +9,7 @@ from tqdm import tqdm
 def compute_similarity(
     features_df: pd.DataFrame,
     sim_function: Callable[[np.array, np.array], np.array],
-    batches: int = 1,
+    batches: int = 100,
 ) -> pd.DataFrame:
     """
     :param features_df: full Data array
@@ -30,7 +30,7 @@ def compute_similarity(
 
 
 def compute_top_ids(
-    similarity_df: pd.DataFrame, top: int = -1, batches: int = 1
+    similarity_df: pd.DataFrame, top: int = -1, batches: int = 100
 ) -> pd.DataFrame:
     """
     :param similarity_df: a similarity matrix
@@ -55,7 +55,7 @@ def compute_top_ids(
 def compute_top_ids_directly(
     features_df: pd.DataFrame,
     sim_function: Callable[[np.array, np.array], np.array],
-    batches: int = 1,
+    batches: int = 100,
     top: int = -1,
 ) -> np.array:
     """
