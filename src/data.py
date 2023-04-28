@@ -1,4 +1,5 @@
 import os
+import pickle
 from typing import Callable
 
 import numpy as np
@@ -35,16 +36,18 @@ def get_cached(
     :param sim_function: The similarity function
     :return:
     """
-    path = "cache/" + key + ".npy"
+    path = "cache/" + key + ".p"
     if os.path.exists(path):
-        return np.load(path)
+        with open(path, "rb") as file:
+            return pickle.load(file)
     else:
         # Get the similarity
         data = processor(feature, sim_function, min(len(feature), 100))
 
         # Cache and return
         if USE_CACHE:
-            np.save(path, data)
+            with open(path, "wb") as file:
+                pickle.dump(data, file)
         return data
 
 
@@ -114,14 +117,12 @@ def get_similarity_for(
     :param sim_function:
     :return:
     """
-    df = get_features(feature)
-    data = get_cached(
+    return get_cached(
         feature + "_" + sim_function.__name__ + "_" + str(DATA_SIZE) + "_similarity",
-        df.to_numpy(),
+        get_features(feature),
         compute_similarity,
         sim_function,
     )
-    return pd.DataFrame(data, index=df.index, columns=df.index.values)
 
 
 def get_top_ids_for(
@@ -134,11 +135,26 @@ def get_top_ids_for(
     :param sim_function:
     :return:
     """
-    df = get_features(feature)
-    data = get_cached(
+    return get_cached(
         feature + "_" + sim_function.__name__ + "_" + str(DATA_SIZE) + "_top_ids",
-        df.to_numpy(),
+        get_features(feature),
         compute_top_ids_directly,
         sim_function,
     )
-    return pd.DataFrame(data=data, index=df.index, columns=df.index.values)
+
+
+def get_random_top_ids(k: int = -1) -> pd.DataFrame:
+    reference = get_features("tfidf")
+
+    size = DATA_SIZE
+    if size < 0:
+        size = len(reference)
+    if k < 0:
+        k = size
+
+    top_random_ids = np.empty((size, k), dtype=np.int32)
+    np.random.seed(42)
+    for i in range(size):
+        top_random_ids[i] = np.random.choice(size, k, replace=False)
+
+    return pd.DataFrame(top_random_ids, index=reference.index)
