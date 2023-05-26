@@ -144,6 +144,10 @@ def get_top_ids_for(
 
 
 def get_random_top_ids(k: int = -1) -> pd.DataFrame:
+    """
+    :param k: Top K
+    :return: A random baseline ranking
+    """
     reference = get_features("tfidf")
 
     size = DATA_SIZE
