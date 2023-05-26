@@ -87,9 +87,7 @@ def compute_top_ids_directly(
         # Get the document indices instead of the distances
         top_values[i, :] = np.argsort(results * -1, axis=1)[:, :top]
 
-    return pd.DataFrame(
-        data=top_values, index=features_df.index, columns=features_df.index.values
-    )
+    return pd.DataFrame(data=top_values, index=features_df.index)
 
 
 def get_genres(field: str) -> List[str]:
